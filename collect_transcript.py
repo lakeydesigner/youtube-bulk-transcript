@@ -80,29 +80,27 @@ async def main():
         videos = scrapetube.get_playlist(playlistID, sleep=2)
     print("Scrapetube finished")
 
-
     format2ext = {
         "json": "json",
          "pretty": "txt",
          "text": "txt",
          "webvtt": "vtt",
          "srt": "srt"
-            }
+    }
 
-    tasks = []
+    # Loop through each video and get the transcript
     for video in videos:
         video_id = video["videoId"]
         title = video["title"]["runs"][0]["text"]
         title = sanitize_string(title)
         output_path = f"{args.folder}/[{video_id}] - {title}.{format2ext[args.format]}"
 
+        # If the file already exists, skip it
         if os.path.exists(output_path):
             continue
 
-        task = asyncio.create_task(get_video_transcription(video_id, output_path, desired_language=args.language, format_type=args.format))
-        tasks.append(task)
-
-    await asyncio.gather(*tasks)
+        # Save the transcript as soon as it's fetched
+        await get_video_transcription(video_id, output_path, desired_language=args.language, format_type=args.format)
 
 
 
